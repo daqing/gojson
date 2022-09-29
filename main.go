@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -30,11 +31,21 @@ func main() {
 	}
 
 	if v, ok := data[key]; ok {
-		if _v, ok := v.(float64); ok {
-			fmt.Printf("%f\n", _v)
-		} else {
-			fmt.Printf("%s\n", v)
-		}
+		printValue(v)
 	}
 }
 
+func printValue(val interface{}) {
+	if v, ok := val.(float64); ok {
+		detectInt := fmt.Sprintf("%.10f", v)
+		if strings.Count(detectInt, "0") == 10 {
+			fmt.Printf("%d\n", int(v))
+			os.Exit(0)
+		}
+
+		fmt.Printf("%f\n", v)
+		os.Exit(0)
+	}
+
+	fmt.Printf("%s\n", val)
+}
