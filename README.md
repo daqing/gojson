@@ -12,5 +12,10 @@ An unix tool to parse JSON in shell scripts
   $ echo '{"name": "David", "age": 29, "level": 2.7}' | gojson level
   > 2.700000
 
+# nested query
+
+  $ echo '{"name": "David", "work": {"from": "2020-01-02", "kpi": "coding"}}' | gojson work
+  > {"from":"2020-01-02","kpi":"coding"}
+
   $ echo '{"name": "David", "work": {"from": "2020-01-02", "kpi": "coding"}}' | gojson work.from
   > 2020-01-02
