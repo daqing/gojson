@@ -71,3 +71,74 @@ func TestJsonKey(t *testing.T) {
 		}
 	})
 }
+
+func TestProcessJSON(t *testing.T) {
+	t.Run("Valid JSON", func(t *testing.T) {
+		input := `{"ram": 8192}`
+		// Should not panic or return error
+		err := processJSON([]byte(input), "ram")
+		if err != nil {
+			t.Errorf("should process valid JSON without error, got: %v", err)
+		}
+	})
+
+	t.Run("Invalid JSON", func(t *testing.T) {
+		input := `not json`
+		err := processJSON([]byte(input), "ram")
+		if err == nil {
+			t.Errorf("should return error for invalid JSON")
+		}
+	})
+
+	t.Run("Empty input", func(t *testing.T) {
+		input := ``
+		err := processJSON([]byte(input), "ram")
+		if err != nil {
+			t.Errorf("should handle empty input without error")
+		}
+	})
+
+	t.Run("Whitespace only", func(t *testing.T) {
+		input := `   
+		  `
+		err := processJSON([]byte(input), "ram")
+		if err != nil {
+			t.Errorf("should handle whitespace-only input without error")
+		}
+	})
+}
+
+func TestFetchAndResolve(t *testing.T) {
+	t.Run("Simple key", func(t *testing.T) {
+		input := `{"name": "test"}`
+		var data map[string]interface{}
+		json.Unmarshal([]byte(input), &data)
+
+		val := fetchAndResolve(data, "name")
+		if val != "test" {
+			t.Errorf("should fetch simple key, got: %v", val)
+		}
+	})
+
+	t.Run("Nested key", func(t *testing.T) {
+		input := `{"server": {"flavor": {"ram": 8192}}}`
+		var data map[string]interface{}
+		json.Unmarshal([]byte(input), &data)
+
+		val := fetchAndResolve(data, "server.flavor.ram")
+		if val.(float64) != 8192 {
+			t.Errorf("should fetch nested key, got: %v", val)
+		}
+	})
+
+	t.Run("Missing key", func(t *testing.T) {
+		input := `{"name": "test"}`
+		var data map[string]interface{}
+		json.Unmarshal([]byte(input), &data)
+
+		val := fetchAndResolve(data, "missing")
+		if val != nil {
+			t.Errorf("should return nil for missing key, got: %v", val)
+		}
+	})
+}
